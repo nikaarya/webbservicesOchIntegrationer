@@ -6,11 +6,11 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 public class Main {
 
@@ -18,13 +18,12 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //Smidigare sätt att starta tråd då man återanvänder trådarna
         ExecutorService executorService = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(3000)) {
             System.out.println(Thread.currentThread().getName());
             while (true) {
-                //Raden ServerSocket öppnar servern och .accept gör att vi väntar på att någon ska ansluta
+
                 Socket client = serverSocket.accept();
 
                 //Starta tråd
@@ -39,12 +38,6 @@ public class Main {
 
     private static void handleConnection(Socket client) {
         try {
-            //getInetAddress visar oss IP numret till klienten som har ansutit sig
-//            System.out.println(client.getInetAddress());
-//            System.out.println(Thread.currentThread().getName());
-//            Thread.sleep(2000);
-
-            //Hämtar och skriver ut info som klienten skickar till oss, Läser in en textrad åt gången
             var inputFromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
             var url = readRequest(inputFromClient);
 
@@ -59,7 +52,7 @@ public class Main {
             inputFromClient.close();
             outputToClient.close();
             client.close();
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }
@@ -89,16 +82,24 @@ public class Main {
         outputToClient.flush();
     }
 
-    private static void sendJsonResponse(OutputStream outputToClient) throws IOException {
-        //Return json info:
-        //I Labben ska man ta denna info från en databas
-//        List<Person> personss = new ArrayList<>();
-//
-//            personss.add(new Person("Martin", 43, true));
-//            personss.add(new Person("Kalle", 23, false));
-//            personss.add(new Person("Anna", 11, true));
-//
-        var persons = List.of(new Person("Martin", 43, true), new Person("Kalle", 23, false), new Person("Anna", 11, true));
+    private static void databaseConnection() {
+        try {
+            Class.forName("jdbc:sqlserver://");
+            Connection con = DriverManager.getConnection("jdbc:sqlserver://localhost;username=sa;password=chicagobulls4;database=Everyloop");
+            Statement stmt=con.createStatement();
+            ResultSet rs=stmt.executeQuery("select * from users");
+            while(rs.next())
+                System.out.println(rs.getString(1) + " " + rs.getString(2));
+            con.close();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void sendJsonResponse(OutputStream outputToClient) throws IOException, SQLException {
+
+        var persons = List.of(new User("51", "niar", "losen", "Nika", "Arya", "nika@gmail.com", "0709998877"), new User("52", "annand", "password", "Anna", "Andersson", "anna@gmail.com", "0707771122"));
 
         Gson gson = new Gson();
         String json = gson.toJson(persons);

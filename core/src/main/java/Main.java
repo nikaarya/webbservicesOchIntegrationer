@@ -99,10 +99,10 @@ public class Main {
 
     private static void sendJsonResponse(OutputStream outputToClient) throws IOException, SQLException {
 
-        var persons = List.of(new User("51", "niar", "losen", "Nika", "Arya", "nika@gmail.com", "0709998877"), new User("52", "annand", "password", "Anna", "Andersson", "anna@gmail.com", "0707771122"));
+        var users = List.of(new User("51", "niar", "losen", "Nika", "Arya", "nika@gmail.com", "0709998877"), new User("52", "annand", "password", "Anna", "Andersson", "anna@gmail.com", "0707771122"));
 
         Gson gson = new Gson();
-        String json = gson.toJson(persons);
+        String json = gson.toJson(users);
         System.out.println(json);
 
         byte[] data = json.getBytes(StandardCharsets.UTF_8);

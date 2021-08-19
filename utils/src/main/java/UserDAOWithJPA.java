@@ -21,7 +21,6 @@ public class UserDAOWithJPA implements UserDAO {
 
         EntityManager em = emf.createEntityManager();
         em.getTransaction().begin();
-        //User u = em.persist(new User (id, username, password, firstName, lastName, email, phone));
         User u = new User(id, username, password, firstName, lastName, email, phone);
         em.persist(u);
         em.getTransaction().commit();
